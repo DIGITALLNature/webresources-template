@@ -1,0 +1,83 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+variables:
+  - name: SolutionName
+    value: # TODO
+
+resources:
+  repositories:
+    # Add a reference to the pipelinetemplates repository where all the templates are located
+    # No need to clone them, the templates can be referenced directly
+    - repository: pipelinetemplates
+      type: github
+      name: DIGITALLNature/DigitallPipelines
+      endpoint: DIGITALL Pipelines Service Connection
+
+      # By default the default branch is used. If this is not the same default between projects
+      # (for most it is main, but for some it still is master) or a different one should be
+      # used, the ref mus be set:
+      # ref: refs/heads/preview
+      # ref: refs/heads/master
+      ref: refs/heads/beta
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: build
+    displayName: Build Web Resources
+    jobs:
+      - job: build
+        steps:
+          - task: NodeTool@0
+            displayName: Install Node.js 22
+            inputs:
+              versionSource: 'spec'
+              versionSpec: '22.x'
+          - script: npm ci
+            displayName: Install npm packages
+          - script: npm run build:prod
+            displayName: Run build script
+          - task: CopyFiles@2
+            displayName: Copy Web Resources to Staging Directory
+            inputs:
+              SourceFolder: 'dist'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          - task: PublishPipelineArtifact@1
+            displayName: Publish Web Resources as Pipeline Artifacts
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifact: 'webresources'
+              publishLocation: 'pipeline'
+  - stage: push
+    displayName: Push Web Resources
+    condition: and(succeeded(), eq(variables['build.sourceBranch'],'refs/heads/main'))
+    jobs:
+      - deployment: push
+        environment: # TODO
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Prepare dgtp tooling
+                - template: azure-pipeline-templates/dgtp/install.yml@pipelinetemplates
+                  parameters:
+                    preRelease: true
+                - template: azure-pipeline-templates/xrm-connection/build-connectionstring-from-service-connection.yml@pipelinetemplates
+                  parameters:
+                    outputVariableName: PowerPlatformConnectionString
+                    serviceConnection: Power Platform Service Connection Development
+                - task: PowerShell@2
+                  displayName: Register Web Resources
+                  inputs:
+                    targetType: 'inline'
+                    script: dgtp push $(Pipeline.Workspace)/webresources --solution $(SolutionName)
+                  env:
+                    dgtp:xrm:connection: $(PowerPlatformConnectionString)
