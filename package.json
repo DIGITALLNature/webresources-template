@@ -4,8 +4,7 @@
   "description": "Template repository for Dynamics 365 webresources",
   "private": true,
   "scripts": {
-    "format": "biome format --write",
-    "lint": "biome lint",
+    "lint": "eslint src --config eslint.config.mjs",
     "build": "npm run lint && npm run bundle",
     "build:prod": "npm run lint && npm run bundle:prod",
     "bundle": "webpack --config webpack.config.js --mode development --devtool inline-source-map",
