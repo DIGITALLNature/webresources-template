@@ -4,9 +4,10 @@
   "description": "Template repository for Dynamics 365 webresources",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "lint": "eslint src --config eslint.config.mjs",
-    "build": "npm run lint && npm run bundle",
-    "build:prod": "npm run lint && npm run bundle:prod",
+    "build": "pnpm run lint && pnpm run bundle",
+    "build:prod": "pnpm run lint && pnpm run bundle:prod",
     "bundle": "webpack --config webpack.config.js --mode development --devtool inline-source-map",
     "bundle:prod": "webpack --config webpack.config.js --mode production"
   },
@@ -21,14 +22,14 @@
   },
   "homepage": "https://github.com/DIGITALLNature/webresources-template#readme",
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@types/xrm": "^9.0.83",
-    "eslint": "^9.21.0",
+    "@eslint/js": "^9.22.0",
+    "@types/xrm": "^9.0.84",
+    "eslint": "^9.22.0",
     "globals": "^16.0.0",
     "globby": "^14.1.0",
     "ts-loader": "^9.5.2",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.25.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1",
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1"
   }
