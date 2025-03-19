@@ -1,0 +1,11 @@
+{
+  "Entities": [
+      "account"
+  ],
+  "Forms": [
+      "account.account_main.form"
+  ],
+  "SuppressDotNet": true,
+  "SuppressSdkMessages": true,
+  "SuppressMetaData": true
+}
