@@ -6,10 +6,12 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "lint": "eslint src --config eslint.config.mjs",
-    "build": "pnpm run lint && pnpm run bundle",
+    "build": "pnpm run dependencyCheck && pnpm run lint && pnpm run bundle",
     "build:prod": "pnpm run lint && pnpm run bundle:prod",
     "bundle": "webpack --config webpack.config.js --mode development --devtool inline-source-map",
-    "bundle:prod": "webpack --config webpack.config.js --mode production"
+    "bundle:prod": "webpack --config webpack.config.js --mode production",
+    "dependencyCheck": "pnpm audit && pnpm outdated --compatible",
+    "update": "pnpm update --latest --interactive"
   },
   "repository": {
     "type": "git",
