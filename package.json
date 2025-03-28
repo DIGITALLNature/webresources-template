@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Template repository for Dynamics 365 webresources",
   "private": true,
+  "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "lint": "eslint src --config eslint.config.mjs",
