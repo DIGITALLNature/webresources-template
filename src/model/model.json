@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/DIGITALLNature/DigitallPower/beta/schemas/codegeneration/schema.json",
   "Entities": [
       "account"
   ],
