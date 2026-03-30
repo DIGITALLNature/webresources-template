@@ -11,7 +11,7 @@
     "build:prod": "pnpm run lint && pnpm run bundle:prod",
     "bundle": "webpack --config webpack.config.js --mode development --devtool inline-source-map",
     "bundle:prod": "webpack --config webpack.config.js --mode production",
-    "dependencyCheck": "pnpm audit && pnpm outdated --compatible",
+    "dependencyCheck": "pnpm audit --prod && pnpm outdated --compatible",
     "update": "pnpm update --latest --interactive",
     "test": "pnpm exec jest --runInBand",
     "test-watch": "pnpm exec jest --runInBand --watchAll"
