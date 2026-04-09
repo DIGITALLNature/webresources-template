@@ -50,11 +50,10 @@ stages:
               key: 'pnpm | "$(Agent.OS)" | $(WorkingDirectory)/pnpm-lock.yaml'
               path: $(pnpm_config_cache)
             displayName: Cache pnpm
-          - task: NodeTool@0
+          - task: UseNode@1
             displayName: Install Node.js 24
             inputs:
-              versionSource: "spec"
-              versionSpec: "24.x"
+              version: '24.x'
           - script: |
               npm install --global corepack@latest
               corepack enable
