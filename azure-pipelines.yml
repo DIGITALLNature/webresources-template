@@ -1,40 +1,18 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
   batch: true
   branches:
     include:
       - main
-  paths:
-    include:
-      - WebResources/*
 
 variables:
   - name: SolutionName
-    value: Webressources
-  - name: WorkingDirectory
-    value: $(System.DefaultWorkingDirectory)/WebResources
+    value: TODO #TODO: Replace with your solution name
+  - name: EnvironmentName
+    value: TODO #TODO: Replace with your Azure DevOps environment name
+  - name: PowerPlaformServiceConnection
+    value: TODO #TODO: Replace with your service connection name
   - name: pnpm_config_cache
     value: $(Pipeline.Workspace)/.pnpm-store
-
-resources:
-  repositories:
-    # Add a reference to the pipelinetemplates repository where all the templates are located
-    # No need to clone them, the templates can be referenced directly
-    - repository: pipelinetemplates
-      type: github
-      name: DIGITALLNature/DigitallPipelines
-      endpoint: DIGITALL Pipelines Service Connection
-
-      # By default the default branch is used. If this is not the same default between projects
-      # (for most it is main, but for some it still is master) or a different one should be
-      # used, the ref mus be set:
-      # ref: refs/heads/preview
-      # ref: refs/heads/master
-      ref: refs/heads/beta
 
 pool:
   vmImage: ubuntu-latest
@@ -45,58 +23,64 @@ stages:
     jobs:
       - job: build
         steps:
-          - task: Cache@2
-            inputs:
-              key: 'pnpm | "$(Agent.OS)" | $(WorkingDirectory)/pnpm-lock.yaml'
-              path: $(pnpm_config_cache)
-            displayName: Cache pnpm
           - task: UseNode@1
             displayName: Install Node.js 24
             inputs:
               version: '24.x'
+          - task: Cache@2
+            inputs:
+              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              path: $(pnpm_config_cache)
+            displayName: Cache pnpm
           - script: |
               npm install --global corepack@latest
               corepack enable
-              corepack prepare pnpm@latest-10 --activate
+              corepack prepare pnpm@latest-11 --activate
               pnpm config set store-dir $(pnpm_config_cache)
-            displayName: "Setup pnpm"
-          - script: |
-              pnpm install
-              pnpm run build:prod
-            displayName: pnpm install and build
-            workingDirectory: $(WorkingDirectory)
+            displayName: Setup pnpm
+          - script: pnpm install
+            displayName: Install npm packages
+          - script: pnpm run build:prod
+            displayName: Run build script
           - task: CopyFiles@2
             displayName: Copy Web Resources to Staging Directory
             inputs:
-              SourceFolder: "$(WorkingDirectory)/dist"
-              Contents: "**"
-              TargetFolder: "$(Build.ArtifactStagingDirectory)"
+              Contents: |
+                dist/**
+                .config/dotnet-tools.json
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
           - task: PublishPipelineArtifact@1
             displayName: Publish Web Resources as Pipeline Artifacts
             inputs:
-              targetPath: "$(Build.ArtifactStagingDirectory)"
-              artifact: "webresources"
-              publishLocation: "pipeline"
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifact: 'webresources'
+              publishLocation: 'pipeline'
   - stage: push
     displayName: Push Web Resources
     condition: and(succeeded(), eq(variables['build.sourceBranch'],'refs/heads/main'))
     jobs:
       - deployment: push
-        environment: ik-dev
+        environment: $(EnvironmentName)
         strategy:
           runOnce:
             deploy:
               steps:
-                # Prepare dgtp tooling
-                - template: azure-pipeline-templates/dgtp/install.yml@pipelinetemplates
-                  parameters:
-                    preRelease: true
-                - template: azure-pipeline-templates/xrm-connection/build-connectionstring-from-service-connection.yml@pipelinetemplates
-                  parameters:
-                    outputVariableName: PowerPlatformConnectionString
-                    serviceConnection: CRM-IK DEV
+                - task: UseDotNet@2
+                  displayName: Use .NET 10
+                  inputs:
+                    packageType: 'sdk'
+                    version: '10.x'
+                - script: dotnet tool restore
+                  workingDirectory: $(Pipeline.Workspace)/webresources
+                  displayName: Install dgtp
+                - task: PowerPlatformSetConnectionVariables@2
+                  displayName: 'Power Platform Set Connection Variables'
+                  inputs:
+                    authenticationType: 'PowerPlatformSPN'
+                    PowerPlatformSPN: $(PowerPlaformServiceConnection)
                 - script: |
-                    dgtp push $(Pipeline.Workspace)/webresources --solution $(SolutionName) --publish
+                    dotnet tool run dgtp push ./dist --solution $(SolutionName) --publish
+                  workingDirectory: $(Pipeline.Workspace)/webresources
                   displayName: Register Web Resources
                   env:
-                    dgtp:xrm:connection: $(PowerPlatformConnectionString)
+                    "dgtp:xrm:connection": $(PowerPlatformSetConnectionVariables.BuildTools.DataverseConnectionString)

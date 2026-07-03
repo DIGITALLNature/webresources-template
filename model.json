@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DIGITALLNature/DigitallPower/main/schemas/codegeneration/v2/typescript.schema.json",
+  "version": 2,
+  "type": "typescript",
+  "entities": {
+    "names": [
+      "account"
+        ]
+  },
+  "output": {
+    "forms": {
+        "filter": [
+            "account.account_main.form"
+        ],
+        "testHelpers": false
+    }
+  }
+}

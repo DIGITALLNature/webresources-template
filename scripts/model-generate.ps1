@@ -1,5 +1,5 @@
 Write-Host "Switching to profile sample-app"
-dgtp profile select sample-app
+dotnet tool run dgtp profile select sample-app
 
 if ($LastExitCode -ne 0) {
     throw "Profile not found"
@@ -7,4 +7,4 @@ if ($LastExitCode -ne 0) {
 
 Write-Host ""
 Write-Host "Starting model generation"
-dgtp codegeneration $PSScriptRoot/../src/model/ --config  $PSScriptRoot/../src/model/model.json --folder dataverse
+dotnet tool run dgtp codegeneration $PSScriptRoot/../src/model/ --config  $PSScriptRoot/../model.json --folder dataverse

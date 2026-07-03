@@ -1,19 +1,20 @@
 # webresources-template
 
-Template repository for Dynamics 365 webresources. This project uses TypeScript, Webpack, Biome, and Jest to develop and bundle webresources for Dataverse environments.
+Template repository for Dynamics 365 webresources. This project uses TypeScript, Webpack, and Biome to develop and bundle webresources for Dataverse environments.
 
 ## Features
 
 - **TypeScript Support**: Full support for TypeScript with type definitions for XRM.
 - **Webpack Bundling**: Automatic bundling of form and ribbon scripts.
 - **Linting & Formatting**: Powered by [Biome](https://biomejs.dev/).
-- **Testing**: Integrated [Jest](https://jestjs.io/) for unit testing with [xrm-mock](https://github.com/shiamu/xrm-mock).
+- **Testing**: Test dependencies were intentionally removed for now and will be added back with concrete sample tests.
 - **CI/CD Ready**: Pre-configured Azure Pipelines for building and deploying.
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/) (Recommended version: 24.x)
-- [pnpm](https://pnpm.io/) package manager
+- [pnpm](https://pnpm.io/) package manager (required major version: 11)
+- [.NET CLI](https://learn.microsoft.com/dotnet/core/tools/) (required for local tool restore and deployment tooling)
 
 ## Setup
 
@@ -28,18 +29,21 @@ Template repository for Dynamics 365 webresources. This project uses TypeScript,
     pnpm install
     ```
 
+3.  **Restore project-local .NET tools**:
+    ```bash
+    dotnet tool restore
+    ```
+
 ## Development Scripts
 
 The project includes several `pnpm` scripts for development and deployment:
 
-- `pnpm run lint`: Run Biome linter to check for issues.
+- `pnpm run check`: Run Biome check and apply safe fixes.
 - `pnpm run build`: Perform dependency checks, linting, and a development bundle.
 - `pnpm run build:prod`: Perform linting and a production (minified) bundle.
 - `pnpm run bundle`: Bundle scripts in development mode with inline source maps.
 - `pnpm run bundle:prod`: Bundle scripts in production mode.
 - `pnpm run dependencyCheck`: Run `pnpm audit` and check for outdated packages.
-- `pnpm run test`: Run Jest tests once.
-- `pnpm run test-watch`: Run Jest tests in watch mode.
 - `pnpm run update`: Update dependencies interactively.
 
 ## Project Structure
@@ -72,6 +76,8 @@ TODO: Define any necessary environment variables for local development or script
 
 ### PowerShell Scripts
 You can use the provided scripts in the `scripts/` folder to manage models and push webresources. These scripts likely require local configuration or parameters (TODO: add details on required parameters/config).
+
+For `dgtp` setup and usage details, refer to the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower). The tool is pinned locally in `.config/dotnet-tools.json`.
 
 ### CI/CD
 The project includes an `azure-pipelines.yml` file which:

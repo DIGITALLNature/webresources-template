@@ -6,15 +6,14 @@
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "lint": "pnpm exec biome lint",
-    "build": "pnpm run dependencyCheck && pnpm run lint && pnpm run bundle",
-    "build:prod": "pnpm run lint && pnpm run bundle:prod",
+    "check": "biome check --write",
+    "ci": "biome ci",
+    "build": "pnpm run dependencyCheck && pnpm run check && pnpm run bundle",
+    "build:prod": "pnpm run ci && pnpm run bundle:prod",
     "bundle": "webpack --config webpack.config.js --mode development --devtool inline-source-map",
     "bundle:prod": "webpack --config webpack.config.js --mode production",
     "dependencyCheck": "pnpm audit --prod && pnpm outdated --compatible",
-    "update": "pnpm update --latest --interactive",
-    "test": "pnpm exec jest --runInBand",
-    "test-watch": "pnpm exec jest --runInBand --watchAll"
+    "update": "pnpm update --latest --interactive"
   },
   "repository": {
     "type": "git",
@@ -27,23 +26,12 @@
   },
   "homepage": "https://github.com/DIGITALLNature/webresources-template#readme",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.15",
-    "@jest/globals": "^30.4.1",
-    "@odata/parser": "^0.2.14",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@types/jest": "^30.0.0",
+    "@biomejs/biome": "^2.5.2",
     "@types/xrm": "^9.0.94",
-    "globals": "^17.6.0",
-    "globby": "^16.1.1",
-    "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
-    "jest-globals": "^0.1.7",
-    "ts-jest": "^29.4.10",
-    "ts-loader": "^9.5.7",
-    "ts-node": "^10.9.2",
+    "tinyglobby": "^0.2.17",
+    "ts-loader": "^9.6.2",
     "typescript": "^6.0.3",
-    "webpack": "^5.106.2",
-    "webpack-cli": "^7.0.2",
-    "xrm-mock": "^3.6.2"
+    "webpack": "^5.108.3",
+    "webpack-cli": "^7.1.0"
   }
 }
