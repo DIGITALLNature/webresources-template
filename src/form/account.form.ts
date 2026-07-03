@@ -1,4 +1,4 @@
-export namespace Account {
+export namespace AccountForm {
     export function onLoadWithEarlyBoundSpecificForm(executionContext: Xrm.Events.EventContext) {
         // Get a specific form context containing only the attributes that exists on this form
         const formContext = executionContext.getFormContext<XrmTable.Account.AccountMainFormContext>()
