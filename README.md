@@ -34,6 +34,58 @@ Template repository for Dynamics 365 webresources. This project uses TypeScript,
     dotnet tool restore
     ```
 
+## Get Started (Template Customization)
+
+This repository is a starter template. Before using it in a real project, replace the sample placeholders below.
+
+1. **Create and configure a `dgtp` profile for your environment**
+   - Create a local profile for your target Dataverse environment (see the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower) for commands).
+   - Replace the profile name `sample-app` in:
+     - `scripts/model-generate.ps1`
+     - `scripts/push-webresources.ps1`
+
+2. **Set your solution and deployment values**
+   - Replace the solution name `WebResources` in `scripts/push-webresources.ps1`.
+   - Update pipeline variables in `azure-pipelines.yml`:
+     - `SolutionName`
+     - `EnvironmentName`
+     - `PowerPlaformServiceConnection`
+
+3. **Set your global script namespace in Webpack**
+   - In `webpack.config.js`, replace `GLOBAL_NAME = "TODO"` with your project namespace (for example `"DGT"`).
+   - All bundled form/ribbon functions are exposed under this global object in Dataverse.
+   - If your project uses different script locations or naming, adjust the `entryPoints` glob patterns in `webpack.config.js`.
+
+4. **Adjust model generation config**
+   - Update `model.json` entity and form filters to match your Dataverse tables and forms.
+   - Run model generation with:
+     ```bash
+     ./scripts/model-generate.ps1
+     ```
+
+5. **Add your own webresource entry points**
+   - Add form scripts under `src/form/*.form.ts`.
+   - Add ribbon scripts under `src/ribbon/*.ribbon.ts`.
+
+6. **Build and verify locally**
+   - Run:
+     ```bash
+     pnpm run build:prod
+     ```
+   - Confirm output files are generated under `dist/scripts/`.
+
+### Configuration Overview (Compact)
+
+| Config | Where | Must? | Default |
+| --- | --- | --- | --- |
+| `dgtp` profile name | `scripts/model-generate.ps1`, `scripts/push-webresources.ps1` | Yes | `sample-app` |
+| Solution name for push | `scripts/push-webresources.ps1` | Yes | `WebResources` |
+| Global JS namespace | `webpack.config.js` (`GLOBAL_NAME`) | Yes | `TODO` |
+| Model scope (entities/forms) | `model.json` | Yes | sample `account` |
+| Pipeline vars (`SolutionName`, `EnvironmentName`, `PowerPlaformServiceConnection`) | `azure-pipelines.yml` | Yes (for CI push) | `TODO` |
+| Entry-point glob patterns | `webpack.config.js` (`entryPoints`) | No | `src/form/*.form.ts`, `src/ribbon/*.ribbon.ts` |
+| CI env mapping (`dgtp:xrm:connection`) | `azure-pipelines.yml` | No (usually keep) | preset |
+
 ## Development Scripts
 
 The project includes several `pnpm` scripts for development and deployment:
@@ -54,7 +106,7 @@ The project includes several `pnpm` scripts for development and deployment:
     - `model/`: Dataverse entity and form models (often generated).
 - `scripts/`: PowerShell scripts for generating models and pushing webresources.
     - `model-generate.ps1`: Generate TypeScript models from Dataverse.
-    - `push-webressources.ps1`: Push bundled scripts to Dataverse.
+    - `push-webresources.ps1`: Push bundled scripts to Dataverse.
 - `dist/`: Output directory for bundled webresources (generated after build).
 - `azure-pipelines.yml`: CI/CD pipeline definition for Azure DevOps.
 - `webpack.config.js`: Webpack configuration for bundling.
@@ -66,16 +118,17 @@ Webpack is configured to automatically pick up entry points based on file naming
 - Files matching `src/form/*.form.ts` will be bundled into `dist/scripts/form/*.form.js`.
 - Files matching `src/ribbon/*.ribbon.ts` will be bundled into `dist/scripts/ribbon/*.ribbon.js`.
 
-Bundled objects are exposed under the global namespace `DGT`.
-
-## Environment Variables
-
-TODO: Define any necessary environment variables for local development or script execution (e.g., connection strings for model generation).
+Bundled objects are exposed under the global namespace configured in `webpack.config.js` (`GLOBAL_NAME`).
 
 ## Deployment
 
 ### PowerShell Scripts
-You can use the provided scripts in the `scripts/` folder to manage models and push webresources. These scripts likely require local configuration or parameters (TODO: add details on required parameters/config).
+You can use the provided scripts in the `scripts/` folder to manage models and push webresources.
+
+- `scripts/model-generate.ps1`: Selects the `sample-app` profile and runs `dgtp codegeneration` with `model.json`.
+- `scripts/push-webresources.ps1`: Selects the `sample-app` profile and runs `dgtp push` to the `WebResources` solution.
+
+Before using these scripts, configure your local `dgtp` profile values for your target Dataverse environment.
 
 For `dgtp` setup and usage details, refer to the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower). The tool is pinned locally in `.config/dotnet-tools.json`.
 
