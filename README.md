@@ -38,10 +38,10 @@ Template repository for Dynamics 365 webresources. This project uses TypeScript,
 
 This repository is a starter template. Before using it in a real project, replace the sample placeholders below.
 
-1. **Create and configure a `dgtp` profile for your environment**
-   - Create a local profile for your target Dataverse environment (see the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower) for commands).
-   - Replace the profile name `sample-app` in:
-     - `scripts/model-generate.ps1`
+1. **Create and configure a `dgtp` connection for your environment**
+   - Create a local connection for your target Dataverse environment (see the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower) for commands).
+   - Replace the connection name `sample-app` in:
+     - `scripts/generate-model.ps1`
      - `scripts/push-webresources.ps1`
 
 2. **Set your solution and deployment values**
@@ -60,7 +60,7 @@ This repository is a starter template. Before using it in a real project, replac
    - Update `model.json` entity and form filters to match your Dataverse tables and forms.
    - Run model generation with:
      ```bash
-     ./scripts/model-generate.ps1
+     ./scripts/generate-model.ps1
      ```
 
 5. **Add your own webresource entry points**
@@ -78,7 +78,7 @@ This repository is a starter template. Before using it in a real project, replac
 
 | Config | Where | Must? | Default |
 | --- | --- | --- | --- |
-| `dgtp` profile name | `scripts/model-generate.ps1`, `scripts/push-webresources.ps1` | Yes | `sample-app` |
+| `dgtp` connection name | `scripts/generate-model.ps1`, `scripts/push-webresources.ps1` | Yes | `sample-app` |
 | Solution name for push | `scripts/push-webresources.ps1` | Yes | `WebResources` |
 | Global JS namespace | `webpack.config.js` (`GLOBAL_NAME`) | Yes | `TODO` |
 | Model scope (entities/forms) | `model.json` | Yes | sample `account` |
@@ -105,7 +105,7 @@ The project includes several `pnpm` scripts for development and deployment:
     - `ribbon/`: Ribbon scripts (entry points follow `*.ribbon.ts` naming).
     - `model/`: Dataverse entity and form models (often generated).
 - `scripts/`: PowerShell scripts for generating models and pushing webresources.
-    - `model-generate.ps1`: Generate TypeScript models from Dataverse.
+    - `generate-model.ps1`: Generate TypeScript models from Dataverse.
     - `push-webresources.ps1`: Push bundled scripts to Dataverse.
 - `dist/`: Output directory for bundled webresources (generated after build).
 - `azure-pipelines.yml`: CI/CD pipeline definition for Azure DevOps.
@@ -125,10 +125,10 @@ Bundled objects are exposed under the global namespace configured in `webpack.co
 ### PowerShell Scripts
 You can use the provided scripts in the `scripts/` folder to manage models and push webresources.
 
-- `scripts/model-generate.ps1`: Selects the `sample-app` profile and runs `dgtp codegeneration` with `model.json`.
-- `scripts/push-webresources.ps1`: Selects the `sample-app` profile and runs `dgtp push` to the `WebResources` solution.
+- `scripts/generate-model.ps1`: Selects the `sample-app` connection and runs `dgtp codegeneration` with `model.json`.
+- `scripts/push-webresources.ps1`: Selects the `sample-app` connection and runs `dgtp push` to the `WebResources` solution.
 
-Before using these scripts, configure your local `dgtp` profile values for your target Dataverse environment.
+Before using these scripts, configure your local `dgtp` connection values for your target Dataverse environment.
 
 For `dgtp` setup and usage details, refer to the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower). The tool is pinned locally in `.config/dotnet-tools.json`.
 

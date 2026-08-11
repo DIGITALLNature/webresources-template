@@ -1,8 +1,8 @@
-Write-Host "Switching to profile sample-app"
-dotnet tool run dgtp profile select sample-app
+Write-Host "Switching to connection sample-app"
+dotnet tool run dgtp connection select sample-app
 
 if ($LastExitCode -ne 0) {
-    throw "Profile not found"
+    throw "Connection not found"
 }
 
 Write-Host ""

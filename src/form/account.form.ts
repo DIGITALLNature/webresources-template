@@ -1,7 +1,7 @@
 export namespace AccountForm {
     export function onLoadWithEarlyBoundSpecificForm(executionContext: Xrm.Events.EventContext) {
         // Get a specific form context containing only the attributes that exists on this form
-        const formContext = executionContext.getFormContext<XrmTable.Account.AccountMainFormContext>()
+        const formContext = executionContext.getFormContext<XrmForm.Account.Main.Account.FormContext>()
 
         // Get inline hints for the attibute names that do exist on the form
         const nameAttribute = formContext.getAttribute('name')
@@ -9,7 +9,7 @@ export namespace AccountForm {
         // Same goes for the tabs/sections/controls
         const nameControl = formContext.ui.tabs.get('SUMMARY_TAB').sections.get('ACCOUNT_INFORMATION').controls.get('name')
 
-        if (nameControl.getAttribute() === nameAttribute) {
+        if (nameAttribute.controls.get(0) === nameControl) {
             // Do something
         }
     }
