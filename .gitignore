@@ -131,4 +131,5 @@ dist
 .pnp.*
 /.agent-work/
 /.idea/
-/.vscode/
+/.vscode/*
+!/.vscode/extensions.json
