@@ -1,12 +1,12 @@
 # webresources-template
 
-Template repository for Dynamics 365 webresources. This project uses TypeScript, Webpack, and Biome to develop and bundle webresources for Dataverse environments.
+Template repository for Dynamics 365 webresources. This project uses TypeScript, Webpack, Oxlint, and Oxfmt to develop and bundle webresources for Dataverse environments.
 
 ## Features
 
 - **TypeScript Support**: Full support for TypeScript with type definitions for XRM.
 - **Webpack Bundling**: Automatic bundling of form and ribbon scripts.
-- **Linting & Formatting**: Powered by [Biome](https://biomejs.dev/).
+- **Linting & Formatting**: Type-aware checks with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) and formatting with [Oxfmt](https://oxc.rs/docs/guide/usage/formatter.html).
 - **Testing**: No test runner or test script is configured yet.
 - **CI/CD Ready**: Pre-configured Azure Pipelines for building and deploying.
 
@@ -125,14 +125,31 @@ This repository is a starter template. Before using it in a real project, replac
 
 Run these commands from the repository root. They use the pnpm-managed Node.js runtime:
 
-- `pnpm run check`: Run Biome check and apply safe fixes.
-- `pnpm run ci`: Run Biome checks without modifying files.
-- `pnpm run build`: Apply safe Biome fixes and create a development bundle. Dependency maintenance is separate from the build.
-- `pnpm run build:prod`: Run non-writing Biome checks and create a production (minified) bundle.
+- `pnpm run check`: Format source files and apply Oxlint's automatic fixes (without enabling dangerous fixes).
+- `pnpm run ci`: Check formatting and run type-aware linting without modifying files. Formatting failures stop the command before linting.
+- `pnpm run lint`: Run Oxlint without modifying files.
+- `pnpm run format`: Format source files with Oxfmt.
+- `pnpm run format:check`: Check formatting without modifying files.
+- `pnpm run build`: Format, apply lint fixes, and create a development bundle. Dependency maintenance is separate from the build.
+- `pnpm run build:prod`: Check formatting and linting without modifying files, then create a production (minified) bundle.
 - `pnpm run bundle`: Bundle scripts in development mode with inline source maps.
 - `pnpm run bundle:prod`: Bundle scripts in production mode.
 - `pnpm run dependencyCheck`: Run `pnpm audit --prod` and check for compatible dependency updates with `pnpm outdated --compatible`. The audit excludes development dependencies.
 - `pnpm run update`: Interactively update dependencies to their latest versions, including major versions.
+
+### Linting, formatting, and editor setup
+
+Configuration lives in `.oxlintrc.json` and `.oxfmtrc.json`. Generated files under `src/model` are excluded from diagnostics and formatting, but their types remain available for type-aware analysis. Oxlint requires the additional `oxlint-tsgolint` dependency for type-aware rules; it does not replace the build's TypeScript compiler.
+
+Oxfmt uses its default formatting style without project-specific overrides. Oxlint uses its default plugins and rules, supplemented by explicit `no-var` and strict promise-safety rules.
+
+The floating-promise rule enables `checkThenables` because Xrm APIs return `PromiseLike` values. Without this option, those calls can escape the default promise check. Await or return asynchronous operations, or handle rejections explicitly; using `void` only suppresses the diagnostic and does not handle a rejection.
+
+Strict `no-misused-promises` checks are enabled, including async callbacks passed to void-returning APIs. For Dynamics events, check the event's async support rather than assuming it awaits a returned promise. For synchronous events such as OnChange, use a synchronous callback that starts the operation and explicitly handles its rejection.
+
+Use the [official Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). It reads the root Oxlint type-aware setting. Select Oxc as the TypeScript default formatter and enable format-on-save if desired. To apply lint fixes on save, set `editor.codeActionsOnSave` to `{ "source.fixAll.oxc": "explicit" }`. Disable the Biome extension for this workspace if previously installed to avoid competing diagnostics or formatting.
+
+For CI failures, run `pnpm run check` locally, review its changes, and address remaining diagnostics. Biome suppression comments are not Oxlint suppressions; review existing comments when migrating projects rather than mechanically disabling the corresponding rules.
 
 ## Project Structure
 
@@ -148,7 +165,8 @@ Run these commands from the repository root. They use the pnpm-managed Node.js r
 - `webpack.config.js`: Webpack configuration for bundling.
 - `package.json`: Development commands, dependencies, and pnpm / Node.js requirements.
 - `pnpm-lock.yaml`: Locked dependency, package manager, and runtime resolutions.
-- `biome.json`: Configuration for Biome (linting and formatting).
+- `.oxlintrc.json`: Oxlint rules, generated-code exclusions, and type-aware analysis settings.
+- `.oxfmtrc.json`: Oxfmt style and generated-code exclusions.
 
 ## Entry Points
 

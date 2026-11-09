@@ -1,0 +1,12 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "options": {
+        "typeAware": true
+    },
+    "ignorePatterns": ["src/model/**"],
+    "rules": {
+        "no-var": "error",
+        "typescript/no-floating-promises": ["error", { "checkThenables": true }],
+        "typescript/no-misused-promises": "error"
+    }
+}
