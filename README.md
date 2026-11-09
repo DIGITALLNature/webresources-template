@@ -13,7 +13,7 @@ Template repository for Dynamics 365 webresources. This project uses TypeScript,
 ## Requirements
 
 - [Git](https://git-scm.com/) to clone the repository.
-- [pnpm](https://pnpm.io/installation) 12.18.0 or a newer 12.x release, as declared in `package.json`.
+- [pnpm](https://pnpm.io/installation) 12.x, as declared in `package.json`.
 - For Dataverse model generation and deployment only:
   - [.NET SDK](https://learn.microsoft.com/dotnet/core/install/) with the .NET CLI; the deployment pipeline uses .NET 10.
   - [PowerShell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) to run the provided `.ps1` scripts.
@@ -24,7 +24,7 @@ Node.js 26 is managed by pnpm through `devEngines.runtime` in `package.json`. `p
 ## Setup
 
 1.  **Install standalone pnpm (no Node.js required)**:
-    If you already have pnpm 12.18.0 or a newer 12.x release, skip the installation commands.
+    Skip this step if you already have pnpm 12.x installed.
 
     On Windows, run in PowerShell:
     ```powershell
@@ -41,7 +41,7 @@ Node.js 26 is managed by pnpm through `devEngines.runtime` in `package.json`. `p
     ```bash
     pnpm --version
     ```
-    This should report `12.18.0` or a newer 12.x release.
+    This should report a 12.x version.
 
     **Windows caveat:** pnpm documents that Windows Defender can block the standalone executable. If this happens, follow the [official installation guidance](https://pnpm.io/installation). Its recommended Windows alternative is to install Node.js temporarily to bootstrap pnpm with `npm install --global pnpm@12.18.0`; this is a fallback, not a prerequisite for the standalone setup. Do not disable Defender to install pnpm.
 
