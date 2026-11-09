@@ -9,7 +9,11 @@
 		"skipLibCheck": true,
 		"lib": ["ES2022", "DOM"],
 		"types": ["xrm"],
-		"rootDir": "./src"
+		"rootDir": "./src",
+		"outDir": "./.build/typescript",
+		"noEmitOnError": true,
+		"sourceMap": true,
+		"inlineSources": true
 	},
 	"include": [
 		"./src/**/*.ts"

@@ -1,11 +1,11 @@
 # webresources-template
 
-Template repository for Dynamics 365 webresources. This project uses TypeScript, Webpack, and Biome to develop and bundle webresources for Dataverse environments.
+Template repository for Dynamics 365 webresources. This project uses TypeScript, Rolldown, and Biome to develop and bundle webresources for Dataverse environments.
 
 ## Features
 
-- **TypeScript Support**: Full support for TypeScript with type definitions for XRM.
-- **Webpack Bundling**: Automatic bundling of form and ribbon scripts.
+- **TypeScript Support**: Native TypeScript 7 compiler with type definitions for XRM.
+- **Rolldown Bundling**: Automatic bundling of form and ribbon scripts after full-program TypeScript compilation, including ambient const enum inlining.
 - **Linting & Formatting**: Powered by [Biome](https://biomejs.dev/).
 - **Testing**: No test runner or test script is configured yet.
 - **CI/CD Ready**: Pre-configured Azure Pipelines for building and deploying.
@@ -86,10 +86,10 @@ This repository is a starter template. Before using it in a real project, replac
      - `EnvironmentName`
      - `PowerPlaformServiceConnection`
 
-3. **Set your global script namespace in Webpack**
-   - In `webpack.config.js`, replace `GLOBAL_NAME = "TODO"` with your project namespace (for example `"DGT"`).
+3. **Set your global script namespace**
+   - In `rolldown.config.js`, replace `GLOBAL_NAME = "TODO"` with your project namespace (for example `"DGT"`).
    - All bundled form/ribbon functions are exposed under this global object in Dataverse.
-   - If your project uses different script locations or naming, adjust the `entryPoints` glob patterns in `webpack.config.js`.
+   - If your project uses different script locations or naming, adjust `ENTRY_PATTERNS` in `rolldown.config.js`. These patterns refer to emitted JavaScript relative to `.build/typescript`.
 
 4. **Adjust model generation config** (if generating Dataverse models)
    - Update `model.json` entity and form filters to match your Dataverse tables and forms.
@@ -115,10 +115,10 @@ This repository is a starter template. Before using it in a real project, replac
 | --- | --- | --- | --- |
 | `dgtp` connection name | `scripts/generate-model.ps1`, `scripts/push-webresources.ps1` | For model generation / local deployment | `sample-app` |
 | Solution name for push | `scripts/push-webresources.ps1` | For local deployment | `WebResources` |
-| Global JS namespace | `webpack.config.js` (`GLOBAL_NAME`) | Yes | `TODO` |
+| Global JS namespace | `rolldown.config.js` (`GLOBAL_NAME`) | Yes | `TODO` |
 | Model scope (entities/forms) | `model.json` | For model generation | sample `account` |
 | Pipeline vars (`SolutionName`, `EnvironmentName`, `PowerPlaformServiceConnection`) | `azure-pipelines.yml` | Yes (for CI push) | `TODO` |
-| Entry-point glob patterns | `webpack.config.js` (`entryPoints`) | No | `src/form/*.form.ts`, `src/ribbon/*.ribbon.ts` |
+| Entry-point glob patterns | `rolldown.config.js` (`ENTRY_PATTERNS`) | No | `form/*.form.js`, `ribbon/*.ribbon.js` |
 | CI env mapping (`dgtp:xrm:connection`) | `azure-pipelines.yml` | No (usually keep) | preset |
 
 ## Development Scripts
@@ -127,10 +127,12 @@ Run these commands from the repository root. They use the pnpm-managed Node.js r
 
 - `pnpm run check`: Run Biome check and apply safe fixes.
 - `pnpm run ci`: Run Biome checks without modifying files.
+- `pnpm run clean`: Remove intermediate compilation output and deployment output.
+- `pnpm run compile`: Clean outputs and compile the full TypeScript project using `tsc`.
 - `pnpm run build`: Apply safe Biome fixes and create a development bundle. Dependency maintenance is separate from the build.
 - `pnpm run build:prod`: Run non-writing Biome checks and create a production (minified) bundle.
-- `pnpm run bundle`: Bundle scripts in development mode with inline source maps.
-- `pnpm run bundle:prod`: Bundle scripts in production mode.
+- `pnpm run bundle`: Compile TypeScript and bundle scripts in development mode with inline source maps.
+- `pnpm run bundle:prod`: Compile TypeScript and bundle scripts in production mode with minification and no source maps.
 - `pnpm run dependencyCheck`: Run `pnpm audit --prod` and check for compatible dependency updates with `pnpm outdated --compatible`. The audit excludes development dependencies.
 - `pnpm run update`: Interactively update dependencies to their latest versions, including major versions.
 
@@ -145,18 +147,23 @@ Run these commands from the repository root. They use the pnpm-managed Node.js r
     - `push-webresources.ps1`: Push bundled scripts to Dataverse.
 - `dist/`: Output directory for bundled webresources (generated after build).
 - `azure-pipelines.yml`: CI/CD pipeline definition for Azure DevOps.
-- `webpack.config.js`: Webpack configuration for bundling.
+- `rolldown.config.js`: Rolldown CLI configuration, including the global namespace, entry-point patterns, and TypeScript source map loading.
+- `.build/typescript/`: Intermediate JavaScript and source maps (generated and ignored by Git; do not deploy).
 - `package.json`: Development commands, dependencies, and pnpm / Node.js requirements.
 - `pnpm-lock.yaml`: Locked dependency, package manager, and runtime resolutions.
 - `biome.json`: Configuration for Biome (linting and formatting).
 
 ## Entry Points
 
-Webpack is configured to automatically pick up entry points based on file naming conventions:
+The build automatically picks up entry points based on file naming conventions:
 - Files matching `src/form/*.form.ts` will be bundled into `dist/scripts/form/*.form.js`.
 - Files matching `src/ribbon/*.ribbon.ts` will be bundled into `dist/scripts/ribbon/*.ribbon.js`.
 
-Bundled objects are exposed under the global namespace configured in `webpack.config.js` (`GLOBAL_NAME`).
+TypeScript first compiles the full project into `.build/typescript`, inlining ambient const enums from generated XRM declarations. Rolldown then bundles each entry point independently as a browser IIFE (a script that needs no module loader). Compilation errors stop the build before bundling. Both intermediate compilation output and `dist` are cleaned before each build.
+
+Bundled objects are exposed under the global namespace configured in `rolldown.config.js` (`GLOBAL_NAME`). For example, with `GLOBAL_NAME = "DGT"`, register `DGT.AccountForm.onLoad` as a form event handler and enable **Pass execution context as first parameter**.
+
+Each bundle extends the existing global object, so form and ribbon libraries can be loaded together in any order. Use a unique exported namespace per entry point (for example `AccountForm`, `ContactForm`, and `AccountRibbon`); exports with the same name are not deep-merged.
 
 ## Deployment
 
@@ -178,7 +185,7 @@ For `dgtp` setup and usage details, refer to the [DigitallPower repository](http
 ### CI/CD
 The project includes an `azure-pipelines.yml` file which:
 1.  Installs standalone pnpm using the [official Azure Pipelines recipe](https://pnpm.io/continuous-integration#azure-pipelines), without a separate Node.js installation or Corepack. pnpm follows the version declared in `package.json`, and its store is cached between builds.
-2.  Runs `pnpm install --frozen-lockfile` to install dependencies and the managed Node.js runtime, then `pnpm run build:prod`.
+2.  Runs `pnpm install --frozen-lockfile` to install dependencies and the managed Node.js runtime, then runs `pnpm run build:prod`.
 3.  Publishes the bundled `dist` folder as an artifact.
 4.  Pushes the webresources using `dgtp` tooling during the `push` stage on successful builds of `main`. Configure the deployment variables and service connection before enabling the pipeline.
 
