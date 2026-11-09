@@ -125,12 +125,13 @@ This repository is a starter template. Before using it in a real project, replac
 
 Run these commands from the repository root. They use the pnpm-managed Node.js runtime:
 
-- `pnpm run check`: Format source files and apply Oxlint's automatic fixes (without enabling dangerous fixes).
-- `pnpm run ci`: Check formatting and run type-aware linting without modifying files. Formatting failures stop the command before linting.
+- `pnpm run check`: Check formatting and run type-aware linting without modifying files. Formatting failures stop the command before linting.
+- `pnpm run fix`: Format source files and apply Oxlint's automatic fixes (without enabling dangerous fixes).
 - `pnpm run lint`: Run Oxlint without modifying files.
+- `pnpm run lint:fix`: Apply Oxlint's automatic fixes without enabling dangerous fixes.
 - `pnpm run format`: Format source files with Oxfmt.
 - `pnpm run format:check`: Check formatting without modifying files.
-- `pnpm run build`: Format, apply lint fixes, and create a development bundle. Dependency maintenance is separate from the build.
+- `pnpm run build`: Check formatting and linting, then compile and create a development bundle. Source files are not modified; dependency maintenance is separate from the build.
 - `pnpm run build:prod`: Check formatting and linting without modifying files, then create a production (minified) bundle.
 - `pnpm run clean`: Remove intermediate compilation output and deployment output.
 - `pnpm run compile`: Clean outputs and compile the full TypeScript project using `tsc`.
@@ -151,7 +152,7 @@ Strict `no-misused-promises` checks are enabled, including async callbacks passe
 
 Use the [official Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). It reads the root Oxlint type-aware setting. Select Oxc as the TypeScript default formatter and enable format-on-save if desired. To apply lint fixes on save, set `editor.codeActionsOnSave` to `{ "source.fixAll.oxc": "explicit" }`. Disable the Biome extension for this workspace if previously installed to avoid competing diagnostics or formatting.
 
-For CI failures, run `pnpm run check` locally, review its changes, and address remaining diagnostics. Biome suppression comments are not Oxlint suppressions; review existing comments when migrating projects rather than mechanically disabling the corresponding rules.
+For CI failures, run `pnpm run check` locally to inspect diagnostics. Use `pnpm run fix` to apply formatting and automatic lint fixes, review its changes, and address remaining diagnostics. Both build commands check source files without rewriting them; compilation and bundling still clean and regenerate build output. Biome suppression comments are not Oxlint suppressions; review existing comments when migrating projects rather than mechanically disabling the corresponding rules.
 
 ## Project Structure
 

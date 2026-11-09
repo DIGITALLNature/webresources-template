@@ -5,13 +5,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "pnpm run format && oxlint --fix src",
-    "ci": "pnpm run format:check && pnpm run lint",
+    "check": "pnpm run format:check && pnpm run lint",
+    "fix": "pnpm run format && pnpm run lint:fix",
     "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
     "format": "oxfmt --write src",
     "format:check": "oxfmt --check src",
     "build": "pnpm run check && pnpm run bundle",
-    "build:prod": "pnpm run ci && pnpm run bundle:prod",
+    "build:prod": "pnpm run check && pnpm run bundle:prod",
     "clean": "node scripts/clean.mjs",
     "compile": "pnpm run clean && tsc --project tsconfig.json",
     "bundle": "pnpm run compile && rolldown --config rolldown.config.js",
@@ -43,8 +44,8 @@
   },
   "devDependencies": {
     "@types/xrm": "^9.0.95",
-    "oxfmt": "~0.75.0",
-    "oxlint": "~1.90.0",
+    "oxfmt": "^0.77.0",
+    "oxlint": "^1.92.0",
     "oxlint-tsgolint": "^7.0.2006",
     "rolldown": "^1.3.0",
     "typescript": "^7.0.2"
