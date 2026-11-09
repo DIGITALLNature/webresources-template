@@ -23,25 +23,31 @@ stages:
     jobs:
       - job: build
         steps:
-          - task: UseNode@1
-            displayName: Install Node.js 24
-            inputs:
-              version: '24.x'
           - task: Cache@2
             inputs:
               key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
               path: $(pnpm_config_cache)
             displayName: Cache pnpm
-          - script: |
-              npm install --global corepack@latest
-              corepack enable
-              corepack prepare pnpm@latest-11 --activate
-              pnpm config set store-dir $(pnpm_config_cache)
+          - bash: |
+              set -euo pipefail
+              installer="$(Agent.TempDirectory)/pnpm-install.sh"
+              curl -fsSL https://get.pnpm.io/ -o "$installer" \
+                || curl -fsSL https://github.com/pnpm/get.pnpm.io/releases/latest/download/install.sh -o "$installer"
+              sh "$installer"
+              echo "##vso[task.prependpath]$PNPM_HOME/bin"
+              "$PNPM_HOME/bin/pnpm" config set store-dir "$PNPM_STORE_PATH"
             displayName: Setup pnpm
-          - script: pnpm install
-            displayName: Install npm packages
-          - script: pnpm run build:prod
+            env:
+              PNPM_HOME: $(Pipeline.Workspace)/.pnpm
+              PNPM_STORE_PATH: $(pnpm_config_cache)
+          - bash: pnpm install --frozen-lockfile
+            displayName: Install dependencies and Node.js runtime
+            env:
+              PNPM_HOME: $(Pipeline.Workspace)/.pnpm
+          - bash: pnpm run build:prod
             displayName: Run build script
+            env:
+              PNPM_HOME: $(Pipeline.Workspace)/.pnpm
           - task: CopyFiles@2
             displayName: Copy Web Resources to Staging Directory
             inputs:

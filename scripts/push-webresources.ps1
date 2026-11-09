@@ -7,4 +7,4 @@ if ($LastExitCode -ne 0) {
 
 Write-Host ""
 Write-Host "Starting push of WebResources"
-dotnet tool run dgtp push $PSScriptRoot/../dist/ --solution WebResources --delete-obsolete --publish
+dotnet tool run dgtp push $PSScriptRoot/../dist/ --solution WebResources --publish

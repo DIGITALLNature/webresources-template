@@ -5,10 +5,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "check": "biome check --write",
     "ci": "biome ci",
-    "build": "pnpm run dependencyCheck && pnpm run check && pnpm run bundle",
+    "build": "pnpm run check && pnpm run bundle",
     "build:prod": "pnpm run ci && pnpm run bundle:prod",
     "bundle": "webpack --config webpack.config.js --mode development --devtool inline-source-map",
     "bundle:prod": "webpack --config webpack.config.js --mode production",
@@ -25,10 +24,21 @@
     "url": "https://github.com/DIGITALLNature/webresources-template/issues"
   },
   "homepage": "https://github.com/DIGITALLNature/webresources-template#readme",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "26",
+      "onFail": "download"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.18.0",
+      "onFail": "error"
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
     "@types/xrm": "^9.0.95",
-    "tinyglobby": "^0.2.17",
     "ts-loader": "^9.6.2",
     "typescript": "^6.0.3",
     "webpack": "^5.109.2",
