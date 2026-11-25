@@ -8,11 +8,11 @@ if ([string]::IsNullOrWhiteSpace($Connection)) {
     throw "Provide a named dgtp connection with -Connection."
 }
 
-if ([string]::IsNullOrWhiteSpace($Solution) -or $Solution.StartsWith('__DGTP_')) {
+if ([string]::IsNullOrWhiteSpace($Solution)) {
     throw "Provide the solution unique name with -Solution."
 }
 
-if ([string]::IsNullOrWhiteSpace($PublisherPrefix) -or $PublisherPrefix.StartsWith('__DGTP_')) {
+if ([string]::IsNullOrWhiteSpace($PublisherPrefix)) {
     throw "Provide the publisher prefix with -PublisherPrefix."
 }
 
