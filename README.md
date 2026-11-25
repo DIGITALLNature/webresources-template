@@ -50,13 +50,13 @@ target before running. It does not delete obsolete resources by default.
 ## CI deployment
 
 `azure-pipelines.yml` has automatic triggers disabled and `enableDeployment` defaults to `false`.
-Before enabling deployment, configure an Azure DevOps environment and Power Platform service
-connection, set the pipeline's `EnvironmentName` and `PowerPlaformServiceConnection` variables, and
-provide a solution and publisher prefix if their scaffolded defaults are empty. Configure a service
-connection that supplies a Dataverse connection string through the Power Platform Build Tools task;
-review the pipeline and authorize that service connection. Run the pipeline explicitly with
-`enableDeployment: true` only after that setup. See the [dgtp CI guide](https://github.com/DIGITALLNature/DigitallPower/blob/main/docs/guides/ci-cd.md)
-for authentication alternatives.
+Before enabling deployment, configure an Azure DevOps environment, set the pipeline's
+`EnvironmentName` variable, and provide a solution and publisher prefix if their scaffolded defaults
+are empty. Store the Dataverse connection string in an Azure
+Pipelines secret variable named `DataverseConnectionString` (do not put it in this repository).
+Review the pipeline and run it explicitly with `enableDeployment: true` only after that setup.
+See the [dgtp CI guide](https://github.com/DIGITALLNature/DigitallPower/blob/main/docs/guides/ci-cd.md)
+for service-connection and other authentication alternatives.
 
 ## Development
 

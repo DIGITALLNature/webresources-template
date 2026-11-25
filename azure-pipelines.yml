@@ -13,8 +13,6 @@ variables:
     value: '__DGTP_PUBLISHER_PREFIX__'
   - name: EnvironmentName
     value: TODO #TODO: Replace with your Azure DevOps environment name
-  - name: PowerPlaformServiceConnection
-    value: TODO #TODO: Replace with your service connection name
   - name: pnpm_config_cache
     value: $(Pipeline.Workspace)/.pnpm-store
 
@@ -92,14 +90,9 @@ stages:
                 - script: dotnet tool restore
                   workingDirectory: $(Pipeline.Workspace)/webresources
                   displayName: Install dgtp
-                - task: PowerPlatformSetConnectionVariables@2
-                  displayName: 'Power Platform Set Connection Variables'
-                  inputs:
-                    authenticationType: 'PowerPlatformSPN'
-                    PowerPlatformSPN: $(PowerPlaformServiceConnection)
-                - script: |
-                    if [ -z "$SOLUTION_NAME" ] || [ -z "$PUBLISHER_PREFIX" ] || [ -z "$DGTP_CONNECTION_STRING" ]; then
-                      echo "Configure solution, publisher prefix, and the Dataverse service connection before deployment." >&2
+                - bash: |
+                    if [ -z "$DGTP_CONNECTION_STRING" ] || [[ "$DGTP_CONNECTION_STRING" == '$('* ]]; then
+                      echo "Configure the secret DataverseConnectionString pipeline variable before deployment." >&2
                       exit 1
                     fi
                     dotnet tool run dgtp -- webresource push ./dist --solution "$SOLUTION_NAME" --publisher-prefix "$PUBLISHER_PREFIX"
@@ -108,5 +101,5 @@ stages:
                   env:
                     SOLUTION_NAME: $(SolutionName)
                     PUBLISHER_PREFIX: $(PublisherPrefix)
-                    DGTP_CONNECTION_STRING: $(PowerPlatformSetConnectionVariables.BuildTools.DataverseConnectionString)
+                    DGTP_CONNECTION_STRING: $(DataverseConnectionString)
                     DGTP_NON_INTERACTIVE: 'true'
