@@ -2,11 +2,11 @@ import { globSync } from "node:fs";
 import path from "node:path";
 
 // objects will be exposed in this global
-const GLOBAL_NAME = "TODO"; // TODO replace with your global name
+const GLOBAL_NAME = "__DGTP_GLOBAL_NAME__";
 
 const ROOT_DIR = path.resolve();
 const OUTPUT_DIR = path.join(ROOT_DIR, "dist");
-const SCRIPTS_DIR = "scripts"
+const SCRIPTS_DIR = "scripts";
 
 const entryPoints = globSync(["src/form/*.form.ts", "src/ribbon/*.ribbon.ts"]).reduce((entries, relativeFile) => {
   const file = path.resolve(ROOT_DIR, relativeFile);

@@ -1,12 +1,16 @@
-trigger:
-  batch: true
-  branches:
-    include:
-      - main
+trigger: none
+pr: none
+
+parameters:
+  - name: enableDeployment
+    type: boolean
+    default: false
 
 variables:
   - name: SolutionName
-    value: TODO #TODO: Replace with your solution name
+    value: '__DGTP_SOLUTION__'
+  - name: PublisherPrefix
+    value: '__DGTP_PUBLISHER_PREFIX__'
   - name: EnvironmentName
     value: TODO #TODO: Replace with your Azure DevOps environment name
   - name: PowerPlaformServiceConnection
@@ -63,7 +67,7 @@ stages:
               publishLocation: 'pipeline'
   - stage: push
     displayName: Push Web Resources
-    condition: and(succeeded(), eq(variables['build.sourceBranch'],'refs/heads/main'))
+    condition: and(succeeded(), eq('${{ parameters.enableDeployment }}', 'True'))
     jobs:
       - deployment: push
         environment: $(EnvironmentName)
@@ -71,6 +75,15 @@ stages:
           runOnce:
             deploy:
               steps:
+                - bash: |
+                    if [ -z "$SOLUTION_NAME" ] || [ -z "$PUBLISHER_PREFIX" ] || [[ "$SOLUTION_NAME" == __DGTP_* ]] || [[ "$PUBLISHER_PREFIX" == __DGTP_* ]]; then
+                      echo "Configure solution and publisher prefix before deployment." >&2
+                      exit 1
+                    fi
+                  displayName: Validate deployment configuration
+                  env:
+                    SOLUTION_NAME: $(SolutionName)
+                    PUBLISHER_PREFIX: $(PublisherPrefix)
                 - task: UseDotNet@2
                   displayName: Use .NET 10
                   inputs:
@@ -85,8 +98,15 @@ stages:
                     authenticationType: 'PowerPlatformSPN'
                     PowerPlatformSPN: $(PowerPlaformServiceConnection)
                 - script: |
-                    dotnet tool run dgtp push ./dist --solution $(SolutionName) --publish
+                    if [ -z "$SOLUTION_NAME" ] || [ -z "$PUBLISHER_PREFIX" ] || [ -z "$DGTP_CONNECTION_STRING" ]; then
+                      echo "Configure solution, publisher prefix, and the Dataverse service connection before deployment." >&2
+                      exit 1
+                    fi
+                    dotnet tool run dgtp -- webresource push ./dist --solution "$SOLUTION_NAME" --publisher-prefix "$PUBLISHER_PREFIX"
                   workingDirectory: $(Pipeline.Workspace)/webresources
                   displayName: Register Web Resources
                   env:
-                    "dgtp:xrm:connection": $(PowerPlatformSetConnectionVariables.BuildTools.DataverseConnectionString)
+                    SOLUTION_NAME: $(SolutionName)
+                    PUBLISHER_PREFIX: $(PublisherPrefix)
+                    DGTP_CONNECTION_STRING: $(PowerPlatformSetConnectionVariables.BuildTools.DataverseConnectionString)
+                    DGTP_NON_INTERACTIVE: 'true'

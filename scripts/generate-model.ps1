@@ -1,10 +1,12 @@
-Write-Host "Switching to connection sample-app"
-dotnet tool run dgtp connection select sample-app
+param(
+    [string] $Connection = ''
+)
 
-if ($LastExitCode -ne 0) {
-    throw "Connection not found"
+if ([string]::IsNullOrWhiteSpace($Connection)) {
+    throw "Provide a named dgtp connection with -Connection."
 }
 
-Write-Host ""
-Write-Host "Starting model generation"
-dotnet tool run dgtp codegeneration $PSScriptRoot/../src/model/ --config  $PSScriptRoot/../model.json --folder dataverse
+dotnet tool run dgtp -- codegeneration "$PSScriptRoot/../src/model/" --config "$PSScriptRoot/../model.json" --folder dataverse --connection $Connection
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
