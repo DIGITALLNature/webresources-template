@@ -113,6 +113,18 @@ Before running the pipeline on `main`:
 4. Review the target before manually running the pipeline on `main`. Enable automatic triggers only
    if your team wants them.
 
+For automatic builds and deployments on changes to `main`, replace `trigger: none` with:
+
+```yaml
+trigger:
+  branches:
+    include:
+      - main
+```
+
+Keep `pr: none` if pull requests should not trigger the pipeline. Successful `main` builds will
+attempt deployment, so configure and review the target first.
+
 ## Development
 
 - Add form entries as `src/form/*.form.ts` and ribbon entries as `src/ribbon/*.ribbon.ts`. Webpack
