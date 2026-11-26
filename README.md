@@ -1,186 +1,142 @@
-# webresources-template
+# __DGTP_PROJECT_NAME__
 
-Template repository for Dynamics 365 webresources. This project uses TypeScript, Webpack, and Biome to develop and bundle webresources for Dataverse environments.
+A starter project for Dataverse form and ribbon webresources using TypeScript, Webpack, and
+[Biome](https://biomejs.dev/). It is based on the
+[DIGITALL webresource template](https://github.com/DIGITALLNature/webresources-template).
 
-## Features
+**This is a starter, not a finished project.** Whether you initialize it with dgtp or download it
+yourself, review the settings below and adapt the included account models and example scripts
+before using your own environment.
 
-- **TypeScript Support**: Full support for TypeScript with type definitions for XRM.
-- **Webpack Bundling**: Automatic bundling of form and ribbon scripts.
-- **Linting & Formatting**: Powered by [Biome](https://biomejs.dev/).
-- **Testing**: No test runner or test script is configured yet.
-- **CI/CD Ready**: Pre-configured Azure Pipelines for building and deploying.
+The essential setup builds without Dataverse settings. If initialization supplied a dgtp
+connection name, solution, and publisher prefix, the local scripts also have defaults for those
+values. Each developer must configure that named connection locally; the scripts do not create it.
 
 ## Requirements
 
-- [Git](https://git-scm.com/) to clone the repository.
-- [pnpm](https://pnpm.io/installation) 12.18.0 or a newer 12.x release, as declared in `package.json`.
-- For Dataverse model generation and deployment only:
-  - [.NET SDK](https://learn.microsoft.com/dotnet/core/install/) with the .NET CLI; the deployment pipeline uses .NET 10.
-  - [PowerShell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) to run the provided `.ps1` scripts.
-  - Access to your target Dataverse environment and a configured `dgtp` connection.
+- [pnpm](https://pnpm.io/installation) 12.18.0 or a newer 12.x release.
+- For model generation and deployment: [.NET SDK 10](https://learn.microsoft.com/dotnet/core/install/),
+  [PowerShell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell),
+  and access to a Dataverse environment.
 
-Node.js 26 is managed by pnpm through `devEngines.runtime` in `package.json`. `pnpm install` downloads the required runtime, and `pnpm run` / `pnpm exec` use it automatically. No separate Node.js installation or global Node shim is required; only pnpm itself needs to be on PATH.
+pnpm downloads the Node.js 26 runtime declared in `package.json`; a separate Node.js installation
+or global shim is not required. Run `pnpm exec node --version` to check the project runtime. On
+Windows, if Defender blocks the standalone pnpm executable, follow the official installation
+guidance; do not disable Defender.
 
-## Setup
+## Install and build
 
-1.  **Install standalone pnpm (no Node.js required)**:
-    If you already have pnpm 12.18.0 or a newer 12.x release, skip the installation commands.
+Run these commands in the project directory:
 
-    On Windows, run in PowerShell:
-    ```powershell
-    $env:PNPM_VERSION = "12.18.0"
-    Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
-    ```
+```shell
+pnpm install --frozen-lockfile
+pnpm run build:prod
+```
 
-    On macOS or Linux:
-    ```bash
-    curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=12.18.0 sh -
-    ```
+The production build runs non-writing Biome checks and creates minified bundles under
+`dist/scripts/`. It does not require the .NET SDK, Dataverse access, or deployment settings.
+No test runner or test script is configured yet.
 
-    Follow the installer's PATH instructions and open a new terminal if prompted. Verify the installation:
-    ```bash
-    pnpm --version
-    ```
-    This should report `12.18.0` or a newer 12.x release.
+## Configure your project
 
-    **Windows caveat:** pnpm documents that Windows Defender can block the standalone executable. If this happens, follow the [official installation guidance](https://pnpm.io/installation). Its recommended Windows alternative is to install Node.js temporarily to bootstrap pnpm with `npm install --global pnpm@12.18.0`; this is a fallback, not a prerequisite for the standalone setup. Do not disable Defender to install pnpm.
+If you used `dgtp webresource init`, review the generated settings below. If you downloaded the
+template directly, replace the placeholder values in the listed files before using them. You can
+also pass connection and deployment values to the scripts instead of storing defaults.
 
-2.  **Clone the repository** (or create your own repository from this template and clone that):
-    ```bash
-    git clone https://github.com/DIGITALLNature/webresources-template.git
-    cd webresources-template
-    ```
+| What | Where | What to do |
+| --- | --- | --- |
+| Package name | `package.json`, `README.md` | Set your npm package name and project title. |
+| Script global | `webpack.config.js`, `GLOBAL_NAME` | Set or review `__DGTP_GLOBAL_NAME__`; form and ribbon functions are exposed under this name. |
+| Example scripts | `src/form/`, `src/ribbon/` | Replace or adapt the account examples to your forms and ribbon buttons. |
+| Model scope | `model.json` | Replace the example account entity and form filters with your own before regenerating models. |
+| Shared connection name | `scripts/generate-model.ps1`, `scripts/push-webresources.ps1` | Set the same named connection in both scripts, or pass `-Connection` when invoking either script. |
+| Local deployment defaults | `scripts/push-webresources.ps1` | Set or review solution `__DGTP_SOLUTION__` and publisher prefix `__DGTP_PUBLISHER_PREFIX__`, or pass them when invoking the script. |
+| CI deployment | `azure-pipelines.yml` | Configure the variables and service connection described below before running the pipeline on `main`. |
 
-3.  **Install dependencies and the project runtime**:
-    ```bash
-    pnpm install
-    ```
+When using the template directly, replace the placeholders in this README too. If you leave
+placeholders in the scripts, pass the corresponding values explicitly when running them. Adjust
+the entry-point patterns in `webpack.config.js` if your source layout differs.
 
-    Verify the managed Node.js version with:
-    ```bash
-    pnpm exec node --version
-    ```
-    This should report `v26.x.x`. Plain `node --version` may still report a different system installation; no shim setup is needed for this repository.
+## Generate Dataverse models
 
-4.  **Restore project-local .NET tools** (only for model generation or deployment):
-    ```bash
-    dotnet tool restore
-    ```
+The included example models allow the frontend to build without a connection. To generate models
+for your environment:
 
-    For frontend-only development and bundling, skip the .NET tool restore and Dataverse connection setup.
+1. Update the entity and form filters in `model.json`.
+2. Restore the pinned tool and create a named connection using the
+   [dgtp connection commands](https://github.com/DIGITALLNature/DigitallPower/blob/main/docs/reference/commands/connection.md).
+3. If the model-generation script has a connection default, run:
 
-## Get Started (Template Customization)
+   ```powershell
+   dotnet tool restore
+   pwsh -File ./scripts/generate-model.ps1
+   ```
 
-This repository is a starter template. Before using it in a real project, replace the sample placeholders below.
+Generated files go under `src/model/dataverse/`. The connection is selected for this invocation
+only; the script does not change the stored default connection. If no connection default was
+supplied, or to override it, add `-Connection 'my-connection'` using your local connection name.
+Regeneration replaces the included sample model files; update the account examples if your model
+filters no longer generate the types they use.
 
-1. **Create and configure a `dgtp` connection for your environment** (model generation or deployment only)
-   - Create a local connection for your target Dataverse environment (see the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower) for commands).
-   - Replace the connection name `sample-app` in:
-     - `scripts/generate-model.ps1`
-     - `scripts/push-webresources.ps1`
+## Deploy locally
 
-2. **Set your solution and deployment values** (deployment only)
-   - Replace the solution name `WebResources` in `scripts/push-webresources.ps1`.
-   - Update pipeline variables in `azure-pipelines.yml`:
-     - `SolutionName`
-     - `EnvironmentName`
-     - `PowerPlaformServiceConnection`
-
-3. **Set your global script namespace in Webpack**
-   - In `webpack.config.js`, replace `GLOBAL_NAME = "TODO"` with your project namespace (for example `"DGT"`).
-   - All bundled form/ribbon functions are exposed under this global object in Dataverse.
-   - If your project uses different script locations or naming, adjust the `entryPoints` glob patterns in `webpack.config.js`.
-
-4. **Adjust model generation config** (if generating Dataverse models)
-   - Update `model.json` entity and form filters to match your Dataverse tables and forms.
-   - Run model generation with:
-     ```powershell
-     pwsh -File .\scripts\generate-model.ps1
-     ```
-
-5. **Add your own webresource entry points**
-   - Add form scripts under `src/form/*.form.ts`.
-   - Add ribbon scripts under `src/ribbon/*.ribbon.ts`.
-
-6. **Build and verify locally**
-   - Run:
-     ```bash
-     pnpm run build:prod
-     ```
-   - Confirm output files are generated under `dist/scripts/`.
-
-### Configuration Overview (Compact)
-
-| Config | Where | Must? | Default |
-| --- | --- | --- | --- |
-| `dgtp` connection name | `scripts/generate-model.ps1`, `scripts/push-webresources.ps1` | For model generation / local deployment | `sample-app` |
-| Solution name for push | `scripts/push-webresources.ps1` | For local deployment | `WebResources` |
-| Global JS namespace | `webpack.config.js` (`GLOBAL_NAME`) | Yes | `TODO` |
-| Model scope (entities/forms) | `model.json` | For model generation | sample `account` |
-| Pipeline vars (`SolutionName`, `EnvironmentName`, `PowerPlaformServiceConnection`) | `azure-pipelines.yml` | Yes (for CI push) | `TODO` |
-| Entry-point glob patterns | `webpack.config.js` (`entryPoints`) | No | `src/form/*.form.ts`, `src/ribbon/*.ribbon.ts` |
-| CI env mapping (`dgtp:xrm:connection`) | `azure-pipelines.yml` | No (usually keep) | preset |
-
-## Development Scripts
-
-Run these commands from the repository root. They use the pnpm-managed Node.js runtime:
-
-- `pnpm run check`: Run Biome check and apply safe fixes.
-- `pnpm run ci`: Run Biome checks without modifying files.
-- `pnpm run build`: Apply safe Biome fixes and create a development bundle. Dependency maintenance is separate from the build.
-- `pnpm run build:prod`: Run non-writing Biome checks and create a production (minified) bundle.
-- `pnpm run bundle`: Bundle scripts in development mode with inline source maps.
-- `pnpm run bundle:prod`: Bundle scripts in production mode.
-- `pnpm run dependencyCheck`: Run `pnpm audit --prod` and check for compatible dependency updates with `pnpm outdated --compatible`. The audit excludes development dependencies.
-- `pnpm run update`: Interactively update dependencies to their latest versions, including major versions.
-
-## Project Structure
-
-- `src/`: Contains the TypeScript source code.
-    - `form/`: Form scripts (entry points follow `*.form.ts` naming).
-    - `ribbon/`: Ribbon scripts (entry points follow `*.ribbon.ts` naming).
-    - `model/`: Dataverse entity and form models (often generated).
-- `scripts/`: PowerShell scripts for generating models and pushing webresources.
-    - `generate-model.ps1`: Generate TypeScript models from Dataverse.
-    - `push-webresources.ps1`: Push bundled scripts to Dataverse.
-- `dist/`: Output directory for bundled webresources (generated after build).
-- `azure-pipelines.yml`: CI/CD pipeline definition for Azure DevOps.
-- `webpack.config.js`: Webpack configuration for bundling.
-- `package.json`: Development commands, dependencies, and pnpm / Node.js requirements.
-- `pnpm-lock.yaml`: Locked dependency, package manager, and runtime resolutions.
-- `biome.json`: Configuration for Biome (linting and formatting).
-
-## Entry Points
-
-Webpack is configured to automatically pick up entry points based on file naming conventions:
-- Files matching `src/form/*.form.ts` will be bundled into `dist/scripts/form/*.form.js`.
-- Files matching `src/ribbon/*.ribbon.ts` will be bundled into `dist/scripts/ribbon/*.ribbon.js`.
-
-Bundled objects are exposed under the global namespace configured in `webpack.config.js` (`GLOBAL_NAME`).
-
-## Deployment
-
-### PowerShell Scripts
-You can use the provided scripts in the `scripts/` folder to manage models and push webresources.
-
-- `scripts/generate-model.ps1`: Selects the `sample-app` connection and runs `dgtp codegeneration` with `model.json`.
-- `scripts/push-webresources.ps1`: Selects the `sample-app` connection and runs `dgtp push` to the `WebResources` solution with `--publish`. Obsolete webresources are not deleted by default. Review the target connection and solution before running it: changes are published.
-
-Before using these scripts, restore the local .NET tools, configure your `dgtp` connection, and update the template values. Build the webresources before pushing:
+Restore the local dgtp tool and configure a named connection as described above. If all three
+defaults were supplied during initialization, build and deploy with:
 
 ```powershell
 pnpm run build:prod
-pwsh -File .\scripts\push-webresources.ps1
+pwsh -File ./scripts/push-webresources.ps1
 ```
 
-For `dgtp` setup and usage details, refer to the [DigitallPower repository](https://github.com/DIGITALLNature/DigitallPower). The tool is pinned locally in `.config/dotnet-tools.json`.
+Supply missing values or override defaults with `-Connection 'my-connection' -Solution 'MySolution'
+-PublisherPrefix 'myprefix'`. The script runs `dgtp webresource push`, which creates or updates and
+publishes webresources; it does not delete obsolete resources by default. Check the target
+connection and solution before running it.
 
-### CI/CD
-The project includes an `azure-pipelines.yml` file which:
-1.  Installs standalone pnpm using the [official Azure Pipelines recipe](https://pnpm.io/continuous-integration#azure-pipelines), without a separate Node.js installation or Corepack. pnpm follows the version declared in `package.json`, and its store is cached between builds.
-2.  Runs `pnpm install --frozen-lockfile` to install dependencies and the managed Node.js runtime, then `pnpm run build:prod`.
-3.  Publishes the bundled `dist` folder as an artifact.
-4.  Pushes the webresources using `dgtp` tooling during the `push` stage on successful builds of `main`. Configure the deployment variables and service connection before enabling the pipeline.
+## Configure CI deployment
+
+`azure-pipelines.yml` builds the project and publishes `dist` as a pipeline artifact. Automatic
+triggers are disabled. **A manual run on `main` attempts deployment after a successful build**;
+configure and review the target before running it. Runs on other branches build without deploying.
+
+Before running the pipeline on `main`:
+
+1. Create an Azure DevOps environment and a Power Platform client-secret service connection. Install
+   the Power Platform Build Tools extension and authorize the connection for the pipeline.
+2. In `azure-pipelines.yml`, set `EnvironmentName` and `PowerPlaformServiceConnection` to your
+   environment and service connection. Review `SolutionName` and `PublisherPrefix`; provide any
+   missing defaults.
+3. Verify that the service connection provides a usable Dataverse connection string for the
+   `PowerPlatformSetConnectionVariables` task. See the
+   [dgtp CI guide](https://github.com/DIGITALLNature/DigitallPower/blob/main/docs/guides/ci-cd.md)
+   for connection-string setup and other authentication options.
+4. Review the target before manually running the pipeline on `main`. Enable automatic triggers only
+   if your team wants them.
+
+For automatic builds and deployments on changes to `main`, replace `trigger: none` with:
+
+```yaml
+trigger:
+  branches:
+    include:
+      - main
+```
+
+Keep `pr: none` if pull requests should not trigger the pipeline. Successful `main` builds will
+attempt deployment, so configure and review the target first.
+
+## Development
+
+- Add form entries as `src/form/*.form.ts` and ribbon entries as `src/ribbon/*.ribbon.ts`. Webpack
+  bundles them into `dist/scripts/form/` and `dist/scripts/ribbon/`, respectively.
+- `pnpm run check` applies safe Biome fixes; `pnpm run ci` checks without modifying files.
+- `pnpm run build` makes a development build; `pnpm run build:prod` makes a production build.
+- `pnpm run bundle` and `pnpm run bundle:prod` run Webpack without the Biome step.
+- `pnpm run dependencyCheck` audits production dependencies and checks compatible updates;
+  `pnpm run update` interactively updates dependencies.
+
+The project also includes `biome.json` for formatting and linting, `pnpm-lock.yaml` for dependency
+and runtime resolution, and `.config/dotnet-tools.json` for the pinned dgtp version.
 
 ## License
 

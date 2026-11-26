@@ -1,10 +1,28 @@
-Write-Host "Switching to connection sample-app"
-dotnet tool run dgtp connection select sample-app
+param(
+    [string] $Connection = '__DGTP_CONNECTION_NAME__',
+    [string] $Solution = '__DGTP_SOLUTION__',
+    [string] $PublisherPrefix = '__DGTP_PUBLISHER_PREFIX__'
+)
 
-if ($LastExitCode -ne 0) {
-    throw "Connection not found"
+if ([string]::IsNullOrWhiteSpace($Connection)) {
+    throw "Provide a named dgtp connection with -Connection."
 }
 
-Write-Host ""
-Write-Host "Starting push of WebResources"
-dotnet tool run dgtp push $PSScriptRoot/../dist/ --solution WebResources --publish
+if ([string]::IsNullOrWhiteSpace($Solution)) {
+    throw "Provide the solution unique name with -Solution."
+}
+
+if ([string]::IsNullOrWhiteSpace($PublisherPrefix)) {
+    throw "Provide the publisher prefix with -PublisherPrefix."
+}
+
+Push-Location "$PSScriptRoot/.."
+try {
+    dotnet tool run dgtp -- webresource push "./dist/" --solution $Solution --publisher-prefix $PublisherPrefix --connection $Connection
+    $result = $LASTEXITCODE
+}
+finally {
+    Pop-Location
+}
+
+exit $result

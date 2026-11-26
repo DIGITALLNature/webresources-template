@@ -1,5 +1,5 @@
 {
-  "name": "digitall-webresources",
+  "name": "__DGTP_PROJECT_NAME__",
   "version": "1.0.0",
   "description": "Template repository for Dynamics 365 webresources",
   "private": true,
@@ -14,16 +14,8 @@
     "dependencyCheck": "pnpm audit --prod && pnpm outdated --compatible",
     "update": "pnpm update --latest --interactive"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DIGITALLNature/webresources-template.git"
-  },
   "author": "DIGITALL Nature GmbH",
   "license": "MS-PL",
-  "bugs": {
-    "url": "https://github.com/DIGITALLNature/webresources-template/issues"
-  },
-  "homepage": "https://github.com/DIGITALLNature/webresources-template#readme",
   "devEngines": {
     "runtime": {
       "name": "node",

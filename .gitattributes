@@ -1,0 +1,2 @@
+biome.json text eol=lf
+src/**/*.ts text eol=lf

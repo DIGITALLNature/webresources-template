@@ -1,12 +1,11 @@
-trigger:
-  batch: true
-  branches:
-    include:
-      - main
+trigger: none
+pr: none
 
 variables:
   - name: SolutionName
-    value: TODO #TODO: Replace with your solution name
+    value: '__DGTP_SOLUTION__'
+  - name: PublisherPrefix
+    value: '__DGTP_PUBLISHER_PREFIX__'
   - name: EnvironmentName
     value: TODO #TODO: Replace with your Azure DevOps environment name
   - name: PowerPlaformServiceConnection
@@ -80,13 +79,17 @@ stages:
                   workingDirectory: $(Pipeline.Workspace)/webresources
                   displayName: Install dgtp
                 - task: PowerPlatformSetConnectionVariables@2
+                  name: PowerPlatformSetConnectionVariables
                   displayName: 'Power Platform Set Connection Variables'
                   inputs:
                     authenticationType: 'PowerPlatformSPN'
                     PowerPlatformSPN: $(PowerPlaformServiceConnection)
-                - script: |
-                    dotnet tool run dgtp push ./dist --solution $(SolutionName) --publish
+                - bash: |
+                    dotnet tool run dgtp -- webresource push ./dist --solution "$SOLUTION_NAME" --publisher-prefix "$PUBLISHER_PREFIX"
                   workingDirectory: $(Pipeline.Workspace)/webresources
                   displayName: Register Web Resources
                   env:
-                    "dgtp:xrm:connection": $(PowerPlatformSetConnectionVariables.BuildTools.DataverseConnectionString)
+                    SOLUTION_NAME: $(SolutionName)
+                    PUBLISHER_PREFIX: $(PublisherPrefix)
+                    DGTP_CONNECTION_STRING: $(PowerPlatformSetConnectionVariables.BuildTools.DataverseConnectionString)
+                    DGTP_NON_INTERACTIVE: 'true'
