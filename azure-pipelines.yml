@@ -1,11 +1,6 @@
 trigger: none
 pr: none
 
-parameters:
-  - name: enableDeployment
-    type: boolean
-    default: false
-
 variables:
   - name: SolutionName
     value: '__DGTP_SOLUTION__'
@@ -67,7 +62,7 @@ stages:
               publishLocation: 'pipeline'
   - stage: push
     displayName: Push Web Resources
-    condition: and(succeeded(), eq('${{ parameters.enableDeployment }}', 'True'))
+    condition: and(succeeded(), eq(variables['build.sourceBranch'],'refs/heads/main'))
     jobs:
       - deployment: push
         environment: $(EnvironmentName)

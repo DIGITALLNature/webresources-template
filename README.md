@@ -4,9 +4,9 @@ A starter project for Dataverse form and ribbon webresources using TypeScript, W
 [Biome](https://biomejs.dev/). It is based on the
 [DIGITALL webresource template](https://github.com/DIGITALLNature/webresources-template).
 
-**Setup is not complete after initialization.** The included account models and scripts are
-examples. Review the project settings, model filters, connection, and deployment configuration
-below before using the project with your own environment.
+**This is a starter, not a finished project.** Whether you initialize it with dgtp or download it
+yourself, review the settings below and adapt the included account models and example scripts
+before using your own environment.
 
 The essential setup builds without Dataverse settings. If initialization supplied a dgtp
 connection name, solution, and publisher prefix, the local scripts also have defaults for those
@@ -39,19 +39,23 @@ No test runner or test script is configured yet.
 
 ## Configure your project
 
+If you used `dgtp webresource init`, review the generated settings below. If you downloaded the
+template directly, replace the placeholder values in the listed files before using them. You can
+also pass connection and deployment values to the scripts instead of storing defaults.
+
 | What | Where | What to do |
 | --- | --- | --- |
-| Package name | `package.json` | Review the initialized name; change it if necessary. |
-| Script global | `webpack.config.js`, `GLOBAL_NAME` | Review `__DGTP_GLOBAL_NAME__`; form and ribbon functions are exposed under this name. |
+| Package name | `package.json`, `README.md` | Set your npm package name and project title. |
+| Script global | `webpack.config.js`, `GLOBAL_NAME` | Set or review `__DGTP_GLOBAL_NAME__`; form and ribbon functions are exposed under this name. |
 | Example scripts | `src/form/`, `src/ribbon/` | Replace or adapt the account examples to your forms and ribbon buttons. |
 | Model scope | `model.json` | Replace the example account entity and form filters with your own before regenerating models. |
-| Shared connection name | `scripts/generate-model.ps1`, `scripts/push-webresources.ps1` | Review the initialized default or pass `-Connection` when invoking either script. |
-| Local deployment defaults | `scripts/push-webresources.ps1` | Review the solution `__DGTP_SOLUTION__` and publisher prefix `__DGTP_PUBLISHER_PREFIX__`; provide omitted values when invoking the script. |
-| CI deployment | `azure-pipelines.yml` | Configure the variables and service connection described below before enabling deployment. |
+| Shared connection name | `scripts/generate-model.ps1`, `scripts/push-webresources.ps1` | Set the same named connection in both scripts, or pass `-Connection` when invoking either script. |
+| Local deployment defaults | `scripts/push-webresources.ps1` | Set or review solution `__DGTP_SOLUTION__` and publisher prefix `__DGTP_PUBLISHER_PREFIX__`, or pass them when invoking the script. |
+| CI deployment | `azure-pipelines.yml` | Configure the variables and service connection described below before running the pipeline on `main`. |
 
-If you started directly from the template instead of using `dgtp webresource init`, set the package
-name, global, and optional deployment defaults in these files yourself. Adjust the entry-point
-patterns in `webpack.config.js` if your source layout differs.
+When using the template directly, replace the placeholders in this README too. If you leave
+placeholders in the scripts, pass the corresponding values explicitly when running them. Adjust
+the entry-point patterns in `webpack.config.js` if your source layout differs.
 
 ## Generate Dataverse models
 
@@ -61,7 +65,7 @@ for your environment:
 1. Update the entity and form filters in `model.json`.
 2. Restore the pinned tool and create a named connection using the
    [dgtp connection commands](https://github.com/DIGITALLNature/DigitallPower/blob/main/docs/reference/commands/connection.md).
-3. If a connection name was supplied at initialization, run:
+3. If the model-generation script has a connection default, run:
 
    ```powershell
    dotnet tool restore
@@ -92,10 +96,10 @@ connection and solution before running it.
 ## Configure CI deployment
 
 `azure-pipelines.yml` builds the project and publishes `dist` as a pipeline artifact. Automatic
-triggers are disabled, and the `enableDeployment` parameter defaults to `false`; building does not
-deploy.
+triggers are disabled. **A manual run on `main` attempts deployment after a successful build**;
+configure and review the target before running it. Runs on other branches build without deploying.
 
-Before enabling the push stage:
+Before running the pipeline on `main`:
 
 1. Create an Azure DevOps environment and a Power Platform client-secret service connection. Install
    the Power Platform Build Tools extension and authorize the connection for the pipeline.
@@ -106,8 +110,8 @@ Before enabling the push stage:
    `PowerPlatformSetConnectionVariables` task. See the
    [dgtp CI guide](https://github.com/DIGITALLNature/DigitallPower/blob/main/docs/guides/ci-cd.md)
    for connection-string setup and other authentication options.
-4. Review the target and run the pipeline explicitly with `enableDeployment: true`. Enable
-   automatic triggers only if your team wants them.
+4. Review the target before manually running the pipeline on `main`. Enable automatic triggers only
+   if your team wants them.
 
 ## Development
 
