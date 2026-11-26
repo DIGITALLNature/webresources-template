@@ -75,15 +75,6 @@ stages:
           runOnce:
             deploy:
               steps:
-                - bash: |
-                    if [ -z "$SOLUTION_NAME" ] || [ -z "$PUBLISHER_PREFIX" ]; then
-                      echo "Configure solution and publisher prefix before deployment." >&2
-                      exit 1
-                    fi
-                  displayName: Validate deployment configuration
-                  env:
-                    SOLUTION_NAME: $(SolutionName)
-                    PUBLISHER_PREFIX: $(PublisherPrefix)
                 - task: UseDotNet@2
                   displayName: Use .NET 10
                   inputs:
