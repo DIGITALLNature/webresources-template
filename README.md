@@ -8,6 +8,10 @@ A starter project for Dataverse form and ribbon webresources using TypeScript, W
 examples. Review the project settings, model filters, connection, and deployment configuration
 below before using the project with your own environment.
 
+The essential setup builds without Dataverse settings. If initialization supplied a dgtp
+connection name, solution, and publisher prefix, the local scripts also have defaults for those
+values. Each developer must configure that named connection locally; the scripts do not create it.
+
 ## Requirements
 
 - [pnpm](https://pnpm.io/installation) 12.18.0 or a newer 12.x release.
@@ -41,6 +45,7 @@ No test runner or test script is configured yet.
 | Script global | `webpack.config.js`, `GLOBAL_NAME` | Review `__DGTP_GLOBAL_NAME__`; form and ribbon functions are exposed under this name. |
 | Example scripts | `src/form/`, `src/ribbon/` | Replace or adapt the account examples to your forms and ribbon buttons. |
 | Model scope | `model.json` | Replace the example account entity and form filters with your own before regenerating models. |
+| Shared connection name | `scripts/generate-model.ps1`, `scripts/push-webresources.ps1` | Review the initialized default or pass `-Connection` when invoking either script. |
 | Local deployment defaults | `scripts/push-webresources.ps1` | Review the solution `__DGTP_SOLUTION__` and publisher prefix `__DGTP_PUBLISHER_PREFIX__`; provide omitted values when invoking the script. |
 | CI deployment | `azure-pipelines.yml` | Configure the variables and service connection described below before enabling deployment. |
 
@@ -56,31 +61,33 @@ for your environment:
 1. Update the entity and form filters in `model.json`.
 2. Restore the pinned tool and create a named connection using the
    [dgtp connection commands](https://github.com/DIGITALLNature/DigitallPower/blob/main/docs/reference/commands/connection.md).
-3. Replace `my-connection` with that connection's name and run:
+3. If a connection name was supplied at initialization, run:
 
    ```powershell
    dotnet tool restore
-   pwsh -File ./scripts/generate-model.ps1 -Connection 'my-connection'
+   pwsh -File ./scripts/generate-model.ps1
    ```
 
 Generated files go under `src/model/dataverse/`. The connection is selected for this invocation
-only; the script does not change the stored default connection.
+only; the script does not change the stored default connection. If no connection default was
+supplied, or to override it, add `-Connection 'my-connection'` using your local connection name.
+Regeneration replaces the included sample model files; update the account examples if your model
+filters no longer generate the types they use.
 
 ## Deploy locally
 
-Restore the local dgtp tool and configure a named connection as described above. Build first, then
-replace the example arguments with your target connection, solution unique name, and publisher
-prefix:
+Restore the local dgtp tool and configure a named connection as described above. If all three
+defaults were supplied during initialization, build and deploy with:
 
 ```powershell
 pnpm run build:prod
-pwsh -File ./scripts/push-webresources.ps1 -Connection 'my-connection' -Solution 'MySolution' -PublisherPrefix 'myprefix'
+pwsh -File ./scripts/push-webresources.ps1
 ```
 
-The `-Solution` and `-PublisherPrefix` arguments can be omitted when their defaults in the script
-are set. Missing values must be supplied at execution. The script runs `dgtp webresource push`,
-which creates or updates and publishes webresources; it does not delete obsolete resources by
-default. Check the target connection and solution before running it.
+Supply missing values or override defaults with `-Connection 'my-connection' -Solution 'MySolution'
+-PublisherPrefix 'myprefix'`. The script runs `dgtp webresource push`, which creates or updates and
+publishes webresources; it does not delete obsolete resources by default. Check the target
+connection and solution before running it.
 
 ## Configure CI deployment
 
